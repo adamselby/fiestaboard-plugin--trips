@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "A simple travel countdown, with names and dates.",
   "author": "Adam Selby",
-  "repository": "",
+  "repository": "https://github.com/adamselby/fiestaboard-plugin--trips",
   "documentation": "README.md",
   "icon": "plane",
   "category": "utility",
