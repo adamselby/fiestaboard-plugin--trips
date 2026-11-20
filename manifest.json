@@ -1,0 +1,276 @@
+{
+  "id": "trips",
+  "name": "Trips",
+  "version": "1.0.0",
+  "description": "A simple travel countdown, with names and dates.",
+  "author": "Adam Selby",
+  "repository": "",
+  "documentation": "README.md",
+  "icon": "plane",
+  "category": "utility",
+  "supports_triggers": true,
+  "min_refresh_seconds": 60,
+  "settings_schema": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean",
+        "title": "Enabled",
+        "default": false
+      },
+      "trips": {
+        "type": "array",
+        "title": "Trips",
+        "description": "One row per trip. Return date is optional.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "destination": {
+              "type": "string",
+              "title": "Destination",
+              "description": "e.g. Denver"
+            },
+            "depart": {
+              "type": "string",
+              "title": "Depart",
+              "description": "YYYY-MM-DD"
+            },
+            "return": {
+              "type": "string",
+              "title": "Return",
+              "description": "YYYY-MM-DD (optional). Only used to say WELCOME HOME on the day."
+            }
+          },
+          "required": [
+            "destination",
+            "depart"
+          ]
+        },
+        "default": []
+      },
+      "timezone": {
+        "type": "string",
+        "title": "Timezone",
+        "description": "Decides when \"today\" starts and ends.",
+        "default": "America/Chicago",
+        "ui:widget": "timezone"
+      },
+      "lookahead_days": {
+        "type": "integer",
+        "title": "Upcoming Window (days)",
+        "description": "How far ahead the upcoming list looks.",
+        "default": 90,
+        "minimum": 1,
+        "maximum": 366
+      },
+      "announce": {
+        "type": "boolean",
+        "title": "Take Over the Board",
+        "description": "Interrupt your normal pages to show departure and return days, then hand the board back.",
+        "default": false
+      },
+      "announce_mode": {
+        "type": "string",
+        "title": "Takeover Style",
+        "description": "Once a day for a set length, or the first few minutes of every hour.",
+        "enum": [
+          "daily",
+          "hourly"
+        ],
+        "enumNames": [
+          "Once a day",
+          "Start of every hour"
+        ],
+        "default": "daily"
+      },
+      "announce_hour": {
+        "type": "integer",
+        "title": "Start Hour",
+        "description": "0-23, local time. Once a day: when it starts. Every hour: the first hour it runs.",
+        "default": 8,
+        "minimum": 0,
+        "maximum": 23
+      },
+      "announce_end_hour": {
+        "type": "integer",
+        "title": "End Hour (every-hour style)",
+        "description": "0-24. The takeover doesn't start in this hour or later.",
+        "default": 22,
+        "minimum": 1,
+        "maximum": 24
+      },
+      "announce_minutes": {
+        "type": "integer",
+        "title": "Takeover Length (minutes)",
+        "description": "Once a day: up to 1440. Every hour: capped at 60.",
+        "default": 30,
+        "minimum": 1,
+        "maximum": 1440
+      },
+      "takeover_priority": {
+        "type": "integer",
+        "title": "Takeover Priority",
+        "description": "When two takeovers overlap, the higher number wins.",
+        "default": 30,
+        "minimum": 1,
+        "maximum": 99
+      },
+      "refresh_seconds": {
+        "type": "integer",
+        "title": "Refresh Interval (seconds)",
+        "description": "How often to recompute (and reshuffle confetti). The date rolls over within this long of midnight.",
+        "default": 300,
+        "minimum": 60,
+        "maximum": 3600
+      }
+    }
+  },
+  "variables": {
+    "groups": {
+      "now": {
+        "label": "Current Trip"
+      },
+      "next": {
+        "label": "Next Trip"
+      }
+    },
+    "simple": {
+      "is_trip_day": {
+        "description": "\"true\" on a departure day",
+        "group": "now",
+        "max_length": 5,
+        "example": "false"
+      },
+      "is_return_day": {
+        "description": "\"true\" on a return day",
+        "group": "now",
+        "max_length": 5,
+        "example": "false"
+      },
+      "is_takeover": {
+        "description": "\"true\" on departure or return day",
+        "group": "now",
+        "max_length": 5,
+        "example": "false"
+      },
+      "name": {
+        "description": "Destination, on departure day only",
+        "group": "now",
+        "max_length": 22,
+        "example": "MILWAUKEE"
+      },
+      "message": {
+        "description": "MILWAUKEE TODAY / WELCOME HOME!",
+        "group": "now",
+        "max_length": 44,
+        "example": "MILWAUKEE TODAY"
+      },
+      "confetti": {
+        "description": "22 random color tiles, reshuffled every refresh",
+        "group": "now",
+        "max_length": 22,
+        "example": "{63}{64}{65}"
+      },
+      "next_name": {
+        "description": "Next trip's destination",
+        "group": "next",
+        "max_length": 22,
+        "example": "MILWAUKEE"
+      },
+      "next_date": {
+        "description": "Next departure, e.g. DEC 1",
+        "group": "next",
+        "max_length": 6,
+        "example": "DEC 1"
+      },
+      "next_days": {
+        "description": "Days until the next departure",
+        "group": "next",
+        "max_length": 3,
+        "example": "12",
+        "type": "number"
+      },
+      "next_formatted": {
+        "description": "e.g. MILWAUKEE IN 12 DAYS",
+        "group": "next",
+        "max_length": 44,
+        "example": "MILWAUKEE IN 12 DAYS"
+      }
+    },
+    "arrays": {
+      "upcoming": {
+        "label_field": "name",
+        "item_fields": [
+          "name",
+          "date",
+          "days"
+        ]
+      }
+    }
+  },
+  "max_lengths": {
+    "upcoming.*.name": 15,
+    "upcoming.*.date": 6,
+    "upcoming.*.days": 3
+  },
+  "demo": {
+    "name": "Trips Demo",
+    "device_type": "flagship",
+    "template": [
+      "",
+      "NEXT TRIP",
+      "{{trips.next_name}}",
+      "{{trips.next_days}} DAYS",
+      "",
+      ""
+    ],
+    "line_metadata": [
+      {
+        "alignment": "center",
+        "wrap": false
+      },
+      {
+        "alignment": "center",
+        "wrap": false
+      },
+      {
+        "alignment": "center",
+        "wrap": false
+      },
+      {
+        "alignment": "center",
+        "wrap": false
+      },
+      {
+        "alignment": "center",
+        "wrap": false
+      },
+      {
+        "alignment": "center",
+        "wrap": false
+      }
+    ]
+  },
+  "teaser": "MILWAUKEE: 12 DAYS",
+  "previews": [
+    {
+      "device_type": "flagship",
+      "rows": [
+        "      NEXT TRIP",
+        "",
+        "        MILWAUKEE",
+        "        DEC 1",
+        "       12 DAYS",
+        ""
+      ]
+    },
+    {
+      "device_type": "note",
+      "rows": [
+        "   NEXT TRIP",
+        "    MILWAUKEE",
+        "    12 DAYS"
+      ]
+    }
+  ]
+}
